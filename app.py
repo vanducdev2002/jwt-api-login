@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 import json
 
-app = Flask(__name__)   # Biến này bắt buộc tên 'app'
+app = Flask(__name__)
 
 API_URL = "https://jwt.thug4ff.xyz/token"
 OLD_CREDITS = "https://great.thug4ff.com/"
@@ -18,14 +18,21 @@ def get_token():
 
     try:
         resp = requests.get(API_URL, params={"uid": uid, "password": password}, timeout=10)
-        resp.raise_for_status()
+        resp.raise_for_status()  # nếu status >= 400, ném ngoại lệ
         data = resp.json()
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except requests.exceptions.HTTPError as e:
+        # Bắt riêng lỗi HTTP (400, 401, 403...)
+        return jsonify({"error": "Yêu cầu không hợp lệ, vui lòng kiểm tra uid và password"}), 400
+    except requests.exceptions.RequestException as e:
+        # Lỗi kết nối, timeout, v.v.
+        return jsonify({"error": "Lỗi kết nối đến máy chủ"}), 500
+    except json.JSONDecodeError:
+        return jsonify({"error": "Dữ liệu trả về không đúng định dạng"}), 500
 
+    # Sửa trường credits
     if data.get("credits") == OLD_CREDITS:
         data["credits"] = NEW_CREDITS
 
     return jsonify(data)
 
-# KHÔNG CÓ dòng app.run() ở đây
+# Không có app.run() khi chạy trên Vercel
