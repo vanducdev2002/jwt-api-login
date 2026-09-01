@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 import json
 
-app = Flask(__name__)   # ✅ Biến này phải tên là 'app'
+app = Flask(__name__)   # Biến này bắt buộc tên 'app'
 
 API_URL = "https://jwt.thug4ff.xyz/token"
 OLD_CREDITS = "https://great.thug4ff.com/"
@@ -28,6 +28,4 @@ def get_token():
 
     return jsonify(data)
 
-# ❌ Không cần app.run() khi deploy lên Vercel
-# if __name__ == '__main__':
-#     app.run(host='0.0.0.0', port=5000)
+# KHÔNG CÓ dòng app.run() ở đây
